@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31410.357
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Space Engineers Scripts", "Space Engineers Scripts\Space Engineers Scripts.csproj", "{D1A60FED-6F4C-4E38-962B-0F1AE56EE2B3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D1A60FED-6F4C-4E38-962B-0F1AE56EE2B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1A60FED-6F4C-4E38-962B-0F1AE56EE2B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1A60FED-6F4C-4E38-962B-0F1AE56EE2B3}.Debug|x64.ActiveCfg = Debug|x64
+		{D1A60FED-6F4C-4E38-962B-0F1AE56EE2B3}.Debug|x64.Build.0 = Debug|x64
+		{D1A60FED-6F4C-4E38-962B-0F1AE56EE2B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1A60FED-6F4C-4E38-962B-0F1AE56EE2B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1A60FED-6F4C-4E38-962B-0F1AE56EE2B3}.Release|x64.ActiveCfg = Release|x64
+		{D1A60FED-6F4C-4E38-962B-0F1AE56EE2B3}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {96E45E66-C9B4-4DEE-9BE7-6E749835086E}
+	EndGlobalSection
+EndGlobal
