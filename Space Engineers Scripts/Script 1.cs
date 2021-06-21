@@ -31,7 +31,7 @@ namespace Script1
             GridTerminalSystem.SearchBlocksOfName("[hinge_s2]", hinges_s2, b => b is IMyMotorStator);
             GridTerminalSystem.SearchBlocksOfName("[hinge_s3]", hinges_s3, b => b is IMyMotorStator);
         }
-        int step_d;
+        int step_d = 0;
         int step_s = 0;
         public void Main(string args)
         {
@@ -39,7 +39,7 @@ namespace Script1
 			{
                 case "stepside_go":   //Лапы в стороны
                     step_s++;
-                    for (int step_c = 0; step_c <181 & step_c < step_s; step_c++)
+                    for (int step_c = 0; step_c <181 & step_c < step_s; step_c++)   //Счетчик от 0 до 180 и математика шарниров
                     {
                         int step_s1; int step_s2; int step_s3;
 
@@ -86,10 +86,10 @@ namespace Script1
                     break;
 
                 case "stepdown_go":   //Платформа вниз
-                        step_d++;
-                    for (int step_c = 0; step_c < 181 & step_c < step_d; step_c++)
+                    step_d++;
+                    for (int step_c = 0; step_d < 181 & step_c < step_d; step_c++) //Счетчик от 0 до 180
                     { 
-                        for (int i = 0; i < hinges_d.Count; i++)
+                        for (int i = 0; i < hinges_d.Count; i++)   //Передача значений в шарниры
                         {
                             var hinge_d = hinges_d[i] as IMyMotorStator;
 
@@ -102,14 +102,14 @@ namespace Script1
                     break;
 
                 case "stepdown_back":   //Платформа обратно
-                        step_d = 0;
-                        foreach (var hinge_d in hinges_d)
-                        {
-                            IMyMotorStator hinge_d1 = hinge_d as IMyMotorStator;
+                    step_d = 0;
+                    for (int i = 0; i < hinges_d.Count; i++)   //Передача значений в шарниры
+                    {
+                        var hinge_d = hinges_d[i] as IMyMotorStator;
 
-                            hinge_d1.SetValueFloat("UpperLimit", step_d);
-                            hinge_d1.TargetVelocityRPM = -1F;
-                        };
+                        hinge_d.SetValueFloat("UpperLimit", 90);
+                        hinge_d.TargetVelocityRPM = -1;
+                    };
                     // Сделать переход на stop
                     // Сделать таймер с циклом
                     break;
