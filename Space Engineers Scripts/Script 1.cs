@@ -50,9 +50,9 @@ namespace Script1
 
                         for (int i = 0; i< hinges_s1.Count; i++)   //Передача значений в шарниры
                         {
-                            IMyMotorStator hinge_s1 = hinges_s1[i] as IMyMotorStator;
-                            IMyMotorStator hinge_s2 = hinges_s2[i] as IMyMotorStator;
-                            IMyMotorStator hinge_s3 = hinges_s3[i] as IMyMotorStator;
+                            var hinge_s1 = hinges_s1[i] as IMyMotorStator;
+                            var hinge_s2 = hinges_s2[i] as IMyMotorStator;
+                            var hinge_s3 = hinges_s3[i] as IMyMotorStator;
 
                             hinge_s1.SetValueFloat("UpperLimit", step_s1);
                             hinge_s1.TargetVelocityRPM = 1;
@@ -68,44 +68,41 @@ namespace Script1
 
                 case "stepside_back":   //Лапы обратно
                     step_s = 0;
-                    for (int step_c = 0; step_c < 1; step_c++)
+                    for (int i = 0; i < hinges_s1.Count; i++)   //Передача значений в шарниры
                     {
-                        int step_s1 = 0; int step_s2 = 90; int step_s3 = 90;
+                        var hinge_s1 = hinges_s1[i] as IMyMotorStator;
+                        var hinge_s2 = hinges_s2[i] as IMyMotorStator;
+                        var hinge_s3 = hinges_s3[i] as IMyMotorStator;
 
-                        for (int i = 0; i < hinges_s1.Count; i++)   //Передача значений в шарниры
-                        {
-                            IMyMotorStator hinge_s1 = hinges_s1[i] as IMyMotorStator;
-                            IMyMotorStator hinge_s2 = hinges_s2[i] as IMyMotorStator;
-                            IMyMotorStator hinge_s3 = hinges_s3[i] as IMyMotorStator;
-
-                            hinge_s1.SetValueFloat("UpperLimit", step_s1);
-                            hinge_s1.TargetVelocityRPM = -1;
-                            hinge_s2.SetValueFloat("UpperLimit", step_s2);
-                            hinge_s2.TargetVelocityRPM = -2;
-                            hinge_s3.SetValueFloat("UpperLimit", step_s3);
-                            hinge_s3.TargetVelocityRPM = -1;
-                        };
+                        hinge_s1.SetValueFloat("UpperLimit", 0);
+                        hinge_s1.TargetVelocityRPM = -1;
+                        hinge_s2.SetValueFloat("UpperLimit", 90);
+                        hinge_s2.TargetVelocityRPM = -2;
+                        hinge_s3.SetValueFloat("UpperLimit", 90);
+                        hinge_s3.TargetVelocityRPM = -1;
                     };
                     // Сделать таймер с циклом
                     // Сделать переход на stepdown_go
                     break;
 
                 case "stepdown_go":   //Платформа вниз
-
                         step_d++;
-                        foreach (var hinge_d in hinges_d)
+                    for (int step_c = 0; step_c < 181 & step_c < step_d; step_c++)
+                    { 
+                        for (int i = 0; i < hinges_d.Count; i++)
                         {
-                            IMyMotorStator hinge_d1 = hinge_d as IMyMotorStator;
+                            var hinge_d = hinges_d[i] as IMyMotorStator;
 
-                            hinge_d1.SetValueFloat("UpperLimit", step_d);
-                            hinge_d1.TargetVelocityRPM = 0.01F;
+                            hinge_d.SetValueFloat("UpperLimit", step_d);
+                            hinge_d.TargetVelocityRPM = 0.01F;
                         };
+                    };
                     // Сделать переход на stepdown_back
                     // Сделать таймер с циклом
                     break;
 
                 case "stepdown_back":   //Платформа обратно
-                        step_d--;
+                        step_d = 0;
                         foreach (var hinge_d in hinges_d)
                         {
                             IMyMotorStator hinge_d1 = hinge_d as IMyMotorStator;
