@@ -38,6 +38,7 @@ namespace Script1
         }
         int step_d = 0;
         int step_s = 0;
+        int time = 0;
         public void Main(string args)
         {
             switch (args)
@@ -66,9 +67,44 @@ namespace Script1
                             hinge_s3.SetValueFloat("UpperLimit", step_s3);
                             hinge_s3.TargetVelocityRPM = 1;
                         };
+                        if (step_c < 181)
+						{
+                            Me.TryRun("wait1");
+                        }
+                        else
+                        {
+                            time = 0;
+                            Me.TryRun("stepside_back");
+                        };
+                            
+                        
                     };
                     // Сделать таймер с циклом
                     // Сделать переход на stepside_back
+                    break;
+
+                case "wait1":
+                        
+                    for (int i = 0; i < rotor.Count; i++)
+                    {
+                        var rotor_1 = rotor[i] as IMyMotorStator;
+
+                        if (rotor_1.Angle == 0 & time > 30)
+                        {
+                            time = 0;
+                            Me.TryRun("stepside_go");
+                        }
+                        if (rotor_1.Angle == 180 & time > 30)
+                        {
+                            time = 0;
+                            Me.TryRun("stepside_go");
+                        }
+                        else
+                        {
+                            time++;
+                            Me.TryRun("wait1");
+                        };
+                    };
                     break;
 
                 case "stepside_back":   //Лапы обратно
@@ -86,8 +122,22 @@ namespace Script1
                         hinge_s3.SetValueFloat("UpperLimit", 90);
                         hinge_s3.TargetVelocityRPM = -1;
                     };
+                    Me.TryRun("wait2");
                     // Сделать таймер с циклом
                     // Сделать переход на stepdown_go
+                    break;
+
+                case "wait2":
+                    {
+                        for (int i = 0; i < 30; i++)
+                        {
+                            Me.TryRun("wait2");
+                            if (i == 30)
+                            {
+                                Me.TryRun("stepdown_go");
+                            }
+                        };
+                    };
                     break;
 
                 case "stepdown_go":   //Платформа вниз
@@ -105,6 +155,7 @@ namespace Script1
                             hinge_d.TargetVelocityRPM = 0.01F;
                         };
                     };
+                    Me.TryRun("stepside_go");
                     // Сделать переход на stepdown_back
                     // Сделать таймер с циклом
                     break;
@@ -123,29 +174,38 @@ namespace Script1
                     break;
 
                 case "start":   //Старт работы
-                    for (int i = 0; i < hinges_s1.Count; i++)
+                    for (int i = 0; i < rotor.Count; i++)
                     {
                         var rotor_1 = rotor[i] as IMyMotorStator;
-                        var drills_1 = drills[i] as IMyMotorStator;
 
                         rotor_1.ApplyAction("OnOff_On");
-                        rotor_1.SetValueFloat("Torque", 100);
+                        rotor_1.SetValueFloat("Torque", 100000000);
                         rotor_1.SetValueFloat("BrakingTorque", 0);
                         rotor_1.TargetVelocityRPM = 0.01F;
+                    };
+                    for (int i = 0; i < drills.Count; i++)
+                    {
+                        var drills_1 = drills[i] as IMyShipDrill;
+
                         drills_1.ApplyAction("OnOff_On");
                     };
+                    Me.TryRun("stepside_go");
                     break;
 
                 case "stop":   //Остановка работы
-                    for (int i = 0; i < hinges_s1.Count; i++)
+                    for (int i = 0; i < rotor.Count; i++)
                     {
                         var rotor_1 = rotor[i] as IMyMotorStator;
-                        var drills_1 = drills[i] as IMyMotorStator;
 
                         rotor_1.ApplyAction("OnOff_Off");
                         rotor_1.SetValueFloat("Torque", 0);
-                        rotor_1.SetValueFloat("BrakingTorque", 100);
+                        rotor_1.SetValueFloat("BrakingTorque", 100000000);
                         rotor_1.TargetVelocityRPM = 0;
+                    };
+                    for (int i = 0; i < drills.Count; i++)
+                    {
+                        var drills_1 = drills[i] as IMyShipDrill;
+
                         drills_1.ApplyAction("OnOff_Off");
                     };
                     break;
