@@ -38,16 +38,39 @@ namespace Script1
             GridTerminalSystem.SearchBlocksOfName("[hinge_s2]", hinges_s2, b => b is IMyMotorStator);
             GridTerminalSystem.SearchBlocksOfName("[hinge_s3]", hinges_s3, b => b is IMyMotorStator);
         }
-        int step_d = 0;
         int step_s = 0;
+        int step_d = 0;
         int time = 0;
+
+        int step_s_b = 0;
+        int step_d_b = 0;
+        string args_b = null;
+
         public void Main(string args)
         {
+            if (   //Считывание аргументов после Runtime.UpdateFrequency + список исключений для ввода нового аргумента в программном блоке
+                args_b != null
+                & args != "start"
+                & args != "stop"
+                & args != "stepside_go"
+                & args != "stepside_back"
+                & args != "stepdown_go"
+                & args != "stepdown_back"
+                )   
+            {
+                args = args_b.ToString();
+            };
+            step_s = step_s_b;
+            step_d = step_d_b;
+
             switch (args)
             {
                 case "stepside_go":   //Лапы в стороны
+
                     step_s++;
-                    for (int step_c = 0; step_c < 181 & step_c < step_s; step_c++)   //Счетчик от 0 до 180 и математика шарниров
+                    if (step_s > 180) { step_s = 180; };   //Защита от закликивания игроком
+
+                    for (int step_c = step_s; step_c < 181;)   //Счетчик от 0 до 180 и математика шарниров
                     {
                         int step_s1; int step_s2; int step_s3;
 
@@ -69,47 +92,72 @@ namespace Script1
                             hinge_s3.SetValueFloat("UpperLimit", step_s3);
                             hinge_s3.TargetVelocityRPM = 1;
                         };
-                        if (step_c < 181)
-						{
-                            Me.TryRun("wait1");
+
+                        if (step_c != 180)   //Проверка на полное раскрытие
+                        {
+                            time = 0;
+                            args = "wait1";
+                            break;
                         }
                         else
                         {
                             time = 0;
-                            Me.TryRun("stepside_back");
+                            args = "wait2";
+                            break;
                         };
-                            
-                        
                     };
-                    // Сделать таймер с циклом
-                    // Сделать переход на stepside_back
                     break;
 
-                case "wait1":
+                case "wait1":   //Таймер раскрытия лап
                         
                     for (int i = 0; i < rotor.Count; i++)
                     {
                         var rotor_1 = rotor[i] as IMyMotorStator;
 
-                        if (rotor_1.Angle == 0 & time > 30)
+                        if (rotor_1.Angle == 0 & time > 300)
                         {
                             time = 0;
-                            Me.TryRun("stepside_go");
+                            args = "stepside_go";
                         }
-                        if (rotor_1.Angle == 180 & time > 30)
+                        else if (rotor_1.Angle == 180 & time > 300)
                         {
                             time = 0;
-                            Me.TryRun("stepside_go");
+                            args = "stepside_go";
                         }
                         else
                         {
                             time++;
-                            Me.TryRun("wait1");
+                            args = "wait1";
+                        };
+                    };
+                    break;
+
+                case "wait2":   //Таймер между полноым раскрытием лап и их возвратом
+
+                    for (int i = 0; i < rotor.Count; i++)
+                    {
+                        var rotor_1 = rotor[i] as IMyMotorStator;
+
+                        if (rotor_1.Angle == 0 & time > 300)
+                        {
+                            time = 0;
+                            args = "stepside_back";
+                        }
+                        else if (rotor_1.Angle == 180 & time > 300)
+                        {
+                            time = 0;
+                            args = "stepside_back";
+                        }
+                        else
+                        {
+                            time++;
+                            args = "wait2";
                         };
                     };
                     break;
 
                 case "stepside_back":   //Лапы обратно
+
                     step_s = 0;
                     for (int i = 0; i < hinges_s1.Count; i++)   //Передача значений в шарниры
                     {
@@ -124,27 +172,30 @@ namespace Script1
                         hinge_s3.SetValueFloat("UpperLimit", 90);
                         hinge_s3.TargetVelocityRPM = -1;
                     };
-                    Me.TryRun("wait2");
-                    // Сделать таймер с циклом
-                    // Сделать переход на stepdown_go
+
+                    time = 0;
+                    args = "wait3";
                     break;
 
-                case "wait2":
+                case "wait3":   //Таймер между возвратом лап и шагом платформы вниз
+                    if (time != 10)
                     {
-                        for (int i = 0; i < 30; i++)
-                        {
-                            Me.TryRun("wait2");
-                            if (i == 30)
-                            {
-                                Me.TryRun("stepdown_go");
-                            }
-                        };
+                        time++;
+                        args = "wait3";
+                    }
+                    else
+                    {
+                        time = 0;
+                        args = "stepdown_go";
                     };
                     break;
 
                 case "stepdown_go":   //Платформа вниз
+
                     step_d++;
-                    for (int step_c = 0; step_d < 181 & step_c < step_d; step_c++) //Счетчик от 0 до 180
+                    if (step_d > 180) { step_d = 180; };   //Защита от закликивания игроком
+
+                    for (int step_c = step_d; step_c < 181;)   //Счетчик от 0 до 180
                     {
                         for (int i = 0; i < hinges_d.Count; i++)   //Передача значений в шарниры
                         {
@@ -156,13 +207,48 @@ namespace Script1
                             hinge_d.SetValueFloat("UpperLimit", step_d1);
                             hinge_d.TargetVelocityRPM = 0.01F;
                         };
+
+                        if (step_c != 180)   //Проверка на полное раскрытие
+                        {
+                            time = 0;
+                            args = "stepside_go";
+                            break;
+                        }
+                        else
+                        {
+                            time = 0;
+                            args = "wait4";
+                            break;
+                        };
                     };
-                    Me.TryRun("stepside_go");
-                    // Сделать переход на stepdown_back
-                    // Сделать таймер с циклом
+                    break;
+
+                case "wait4":   //Таймер между полным опусканием платформы и перед её возвратом
+
+                    for (int i = 0; i < rotor.Count; i++)
+                    {
+                        var rotor_1 = rotor[i] as IMyMotorStator;
+
+                        if (rotor_1.Angle == 0 & time > 300)
+                        {
+                            time = 0;
+                            args = "stepdown_back";
+                        }
+                        else if (rotor_1.Angle == 180 & time > 300)
+                        {
+                            time = 0;
+                            args = "stepdown_back";
+                        }
+                        else
+                        {
+                            time++;
+                            args = "wait4";
+                        };
+                    };
                     break;
 
                 case "stepdown_back":   //Платформа обратно
+
                     step_d = 0;
                     for (int i = 0; i < hinges_d.Count; i++)   //Передача значений в шарниры
                     {
@@ -171,11 +257,28 @@ namespace Script1
                         hinge_d.SetValueFloat("UpperLimit", 90);
                         hinge_d.TargetVelocityRPM = -1;
                     };
-                    // Сделать переход на stop
-                    // Сделать таймер с циклом
+
+                    time = 0;
+                    args = "wait5";
+
+                    break;
+
+                case "wait5":   //Таймер между возвратом платформы и остановкой срипта
+
+                    if (time != 10)
+                    {
+                        time++;
+                        args = "wait5";
+                    }
+                    else
+                    {
+                        time = 0;
+                        args = "stop";
+                    };
                     break;
 
                 case "start":   //Старт работы
+
                     for (int i = 0; i < rotor.Count; i++)
                     {
                         var rotor_1 = rotor[i] as IMyMotorStator;
@@ -191,11 +294,13 @@ namespace Script1
 
                         drills_1.ApplyAction("OnOff_On");
                     };
-                    Runtime.UpdateFrequency = UpdateFrequency.Update10;
-                    Me.TryRun("stepside_go");
+                    Runtime.UpdateFrequency = UpdateFrequency.Update100;
+                    time = 0;
+                    args = "stepside_go";
                     break;
 
                 case "stop":   //Остановка работы
+
                     for (int i = 0; i < rotor.Count; i++)
                     {
                         var rotor_1 = rotor[i] as IMyMotorStator;
@@ -211,19 +316,52 @@ namespace Script1
 
                         drills_1.ApplyAction("OnOff_Off");
                     };
+                    time = 0;
+                    args = "stop";
+                    Runtime.UpdateFrequency = UpdateFrequency.None;
                     break;
-                default:   //Любой иной аргумен вызывает остановку скрипта
-                    break;       
+
+                default:   //Любой иной аргумен не делает ничего.
+                    break;
+
             }    //switch end
 
-            for (int i = 0; i < lcds.Count; i++)
-            {
-                var lcd = lcds[i] as IMyTextPanel;
 
-                lcd.WriteText("step_s = " + step_s.ToString());
-                lcd.WriteText("\n" + "step_d = " + step_d.ToString(), true);
+            for (int i1 = 0; i1 < rotor.Count; i1++)
+            {
+                var rotor_1 = rotor[i1] as IMyMotorStator;
+
+                for (int i = 0; i < lcds.Count; i++)   //Выведение переменных для дебага на дипсплей
+                {
+                    var lcd = lcds[i] as IMyTextPanel;
+
+                    lcd.WriteText
+                        (
+                        "step_s = " + step_s.ToString()
+                        );
+                    lcd.WriteText
+                        (
+                        "\n" + "step_d = " + step_d.ToString(), true
+                        );
+                    lcd.WriteText
+                        (
+                        "\n" + "time = " + time.ToString(), true
+                        );
+                    lcd.WriteText
+                        (
+                        "\n" + "args = " + args.ToString(), true
+                        );
+                    lcd.WriteText
+                    (
+                    "\n" + "rotor pos = " + rotor_1.Angle.ToString(), true
+                    );
+                };
 
             };
+
+            args_b = args.ToString();   //Сохранение аргументов от Runtime.UpdateFrequency
+             step_s_b = step_s;
+             step_d_b = step_d;
         }
 
         public void Save()
