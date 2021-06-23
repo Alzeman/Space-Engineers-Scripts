@@ -114,12 +114,12 @@ namespace Script1
                     {
                         var rotor_1 = rotor[i] as IMyMotorStator;
 
-                        if (rotor_1.Angle == 0 & time > 300)
+                        if (Math.Abs(rotor_1.Angle) == 0 & time > 300)
                         {
                             time = 0;
                             args = "stepside_go";
                         }
-                        else if (rotor_1.Angle == 180 & time > 300)
+                        else if (Math.Abs(rotor_1.Angle) == 180 & time > 300)
                         {
                             time = 0;
                             args = "stepside_go";
@@ -138,12 +138,12 @@ namespace Script1
                     {
                         var rotor_1 = rotor[i] as IMyMotorStator;
 
-                        if (rotor_1.Angle == 0 & time > 300)
+                        if (Math.Abs(rotor_1.Angle) == 0 & time > 300)
                         {
                             time = 0;
                             args = "stepside_back";
                         }
-                        else if (rotor_1.Angle == 180 & time > 300)
+                        else if (Math.Abs(rotor_1.Angle) == 180 & time > 300)
                         {
                             time = 0;
                             args = "stepside_back";
@@ -229,12 +229,12 @@ namespace Script1
                     {
                         var rotor_1 = rotor[i] as IMyMotorStator;
 
-                        if (rotor_1.Angle == 0 & time > 300)
+                        if (Math.Abs(rotor_1.Angle) == 0 & time > 300)
                         {
                             time = 0;
                             args = "stepdown_back";
                         }
-                        else if (rotor_1.Angle == 180 & time > 300)
+                        else if (Math.Abs(rotor_1.Angle) == 180 & time > 300)
                         {
                             time = 0;
                             args = "stepdown_back";
