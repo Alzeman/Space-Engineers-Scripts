@@ -18,6 +18,7 @@ namespace Script1
     {
         //------------BEGIN--------------
 
+        List<IMyTerminalBlock> lcds = new List<IMyTerminalBlock>();
         List<IMyTerminalBlock> rotor = new List<IMyTerminalBlock>();
         List<IMyTerminalBlock> drills = new List<IMyTerminalBlock>();
         List<IMyTerminalBlock> hinges_d = new List<IMyTerminalBlock>();
@@ -29,6 +30,7 @@ namespace Script1
         {
             //Наполнение списков уникальными именами объектов из игры
 
+            GridTerminalSystem.SearchBlocksOfName("[lcd]", lcds, b => b is IMyTextPanel);
             GridTerminalSystem.SearchBlocksOfName("[rotor]", rotor, b => b is IMyMotorStator);
             GridTerminalSystem.SearchBlocksOfName("[drill]", drills, b => b is IMyShipDrill);
             GridTerminalSystem.SearchBlocksOfName("[hinge_d]", hinges_d, b => b is IMyMotorStator);
@@ -189,6 +191,7 @@ namespace Script1
 
                         drills_1.ApplyAction("OnOff_On");
                     };
+                    Runtime.UpdateFrequency = UpdateFrequency.Update10;
                     Me.TryRun("stepside_go");
                     break;
 
@@ -210,8 +213,17 @@ namespace Script1
                     };
                     break;
                 default:   //Любой иной аргумен вызывает остановку скрипта
-                    break;
-            }
+                    break;       
+            }    //switch end
+
+            for (int i = 0; i < lcds.Count; i++)
+            {
+                var lcd = lcds[i] as IMyTextPanel;
+
+                lcd.WriteText("step_s = " + step_s.ToString());
+                lcd.WriteText("\n" + "step_d = " + step_d.ToString(), true);
+
+            };
         }
 
         public void Save()
