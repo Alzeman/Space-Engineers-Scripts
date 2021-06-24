@@ -42,8 +42,6 @@ namespace Script1
         int step_d = 0;
         int time = 0;
 
-        int step_s_b = 0;
-        int step_d_b = 0;
         string args_b = null;
 
         public void Main(string args)
@@ -52,20 +50,18 @@ namespace Script1
                 args_b != null
                 & args != "start"
                 & args != "stop"
-                & args != "stepside_go"
-                & args != "stepside_back"
-                & args != "stepdown_go"
-                & args != "stepdown_back"
+                & args != "side_go"
+                & args != "side_back"
+                & args != "down_go"
+                & args != "all_back"
                 )   
             {
                 args = args_b.ToString();
             };
-            step_s = step_s_b;
-            step_d = step_d_b;
 
             switch (args)
             {
-                case "stepside_go":   //Лапы в стороны
+                case "side_go":   //Лапы в стороны
 
                     step_s++;
                     if (step_s > 180) { step_s = 180; };   //Защита от закликивания игроком
@@ -86,77 +82,87 @@ namespace Script1
                             var hinge_s3 = hinges_s3[i] as IMyMotorStator;
 
                             hinge_s1.SetValueFloat("UpperLimit", step_s1);
-                            hinge_s1.TargetVelocityRPM = 1;
+                            hinge_s1.TargetVelocityRPM = 0.1F;
                             hinge_s2.SetValueFloat("UpperLimit", step_s2);
-                            hinge_s2.TargetVelocityRPM = 2;
+                            hinge_s2.TargetVelocityRPM = 0.2F;
                             hinge_s3.SetValueFloat("UpperLimit", step_s3);
-                            hinge_s3.TargetVelocityRPM = 1;
+                            hinge_s3.TargetVelocityRPM = 0.1F;
                         };
 
                         if (step_c != 180)   //Проверка на полное раскрытие
                         {
                             time = 0;
-                            args = "wait1";
+                            args = "wait_side_go";
                             break;
                         }
                         else
                         {
                             time = 0;
-                            args = "wait2";
+                            args = "wait_side_back";
                             break;
                         };
                     };
                     break;
 
-                case "wait1":   //Таймер раскрытия лап
+                case "wait_side_go":   //Таймер раскрытия лап
                         
                     for (int i = 0; i < rotor.Count; i++)
                     {
                         var rotor_1 = rotor[i] as IMyMotorStator;
 
-                        if (Math.Abs(rotor_1.Angle) == 0 & time > 300)
+                        if (Math.Round(rotor_1.Angle, 2) == 0 & time > 300)
                         {
                             time = 0;
-                            args = "stepside_go";
+                            args = "side_go";
                         }
-                        else if (Math.Abs(rotor_1.Angle) == 180 & time > 300)
+                        else if (Math.Round(rotor_1.Angle, 2) == 0.00 & time > 300)
                         {
                             time = 0;
-                            args = "stepside_go";
+                            args = "side_go";
+                        }
+                        else if (Math.Round(rotor_1.Angle, 2) == 3.14 & time > 300)
+                        {
+                            time = 0;
+                            args = "side_go";
                         }
                         else
                         {
                             time++;
-                            args = "wait1";
+                            args = "wait_side_go";
                         };
                     };
                     break;
 
-                case "wait2":   //Таймер между полноым раскрытием лап и их возвратом
+                case "wait_side_back":   //Таймер между полноым раскрытием лап и их возвратом
 
                     for (int i = 0; i < rotor.Count; i++)
                     {
                         var rotor_1 = rotor[i] as IMyMotorStator;
 
-                        if (Math.Abs(rotor_1.Angle) == 0 & time > 300)
+                        if (Math.Round(rotor_1.Angle, 2) == 0 & time > 300)
                         {
                             time = 0;
-                            args = "stepside_back";
+                            args = "side_back";
                         }
-                        else if (Math.Abs(rotor_1.Angle) == 180 & time > 300)
+                        else if (Math.Round(rotor_1.Angle, 2) == 0.00 & time > 300)
                         {
                             time = 0;
-                            args = "stepside_back";
+                            args = "side_go";
+                        }
+                        else if (Math.Round(rotor_1.Angle, 2) == 3.14 & time > 300)
+                        {
+                            time = 0;
+                            args = "side_back";
                         }
                         else
                         {
                             time++;
-                            args = "wait2";
+                            args = "wait_side_back";
                         };
                     };
                     break;
 
-                case "stepside_back":   //Лапы обратно
+                case "side_back":   //Лапы обратно
 
                     step_s = 0;
                     for (int i = 0; i < hinges_s1.Count; i++)   //Передача значений в шарниры
@@ -174,23 +180,23 @@ namespace Script1
                     };
 
                     time = 0;
-                    args = "wait3";
+                    args = "wait_down_go";
                     break;
 
-                case "wait3":   //Таймер между возвратом лап и шагом платформы вниз
-                    if (time != 10)
+                case "wait_down_go":   //Таймер между возвратом лап и шагом платформы вниз
+                    if (time != 100)
                     {
                         time++;
-                        args = "wait3";
+                        args = "wait_down_go";
                     }
                     else
                     {
                         time = 0;
-                        args = "stepdown_go";
+                        args = "down_go";
                     };
                     break;
 
-                case "stepdown_go":   //Платформа вниз
+                case "down_go":   //Платформа вниз
 
                     step_d++;
                     if (step_d > 180) { step_d = 180; };   //Защита от закликивания игроком
@@ -205,51 +211,59 @@ namespace Script1
                             step_d1 = step_d1 + step_c;
 
                             hinge_d.SetValueFloat("UpperLimit", step_d1);
-                            hinge_d.TargetVelocityRPM = 0.01F;
+                            hinge_d.TargetVelocityRPM = 0.1F;
                         };
 
                         if (step_c != 180)   //Проверка на полное раскрытие
                         {
                             time = 0;
-                            args = "stepside_go";
+                            args = "side_go";
                             break;
                         }
                         else
                         {
                             time = 0;
-                            args = "wait4";
+                            args = "wait_all_back";
                             break;
                         };
                     };
                     break;
 
-                case "wait4":   //Таймер между полным опусканием платформы и перед её возвратом
+                case "wait_all_back":   //Таймер между полным опусканием платформы и перед её возвратом
 
                     for (int i = 0; i < rotor.Count; i++)
                     {
                         var rotor_1 = rotor[i] as IMyMotorStator;
 
-                        if (Math.Abs(rotor_1.Angle) == 0 & time > 300)
+                        if (Math.Round(rotor_1.Angle, 2) == 0 & time > 300)
                         {
                             time = 0;
-                            args = "stepdown_back";
+                            args = "all_back";
                         }
-                        else if (Math.Abs(rotor_1.Angle) == 180 & time > 300)
+                        else if (Math.Round(rotor_1.Angle, 2) == 0.00 & time > 300)
                         {
                             time = 0;
-                            args = "stepdown_back";
+                            args = "side_go";
+                        }
+                        else if (Math.Round(rotor_1.Angle, 2) == 3.14 & time > 300)
+                        {
+                            time = 0;
+                            args = "all_back";
                         }
                         else
                         {
                             time++;
-                            args = "wait4";
+                            args = "wait_all_back";
                         };
                     };
+
                     break;
 
-                case "stepdown_back":   //Платформа обратно
+                case "all_back":   //Платформа обратно
 
                     step_d = 0;
+                    step_s = 0;
+
                     for (int i = 0; i < hinges_d.Count; i++)   //Передача значений в шарниры
                     {
                         var hinge_d = hinges_d[i] as IMyMotorStator;
@@ -257,18 +271,32 @@ namespace Script1
                         hinge_d.SetValueFloat("UpperLimit", 90);
                         hinge_d.TargetVelocityRPM = -1;
                     };
+                    
+                    for (int i = 0; i < hinges_s1.Count; i++)   //Передача значений в шарниры
+                    {
+                        var hinge_s1 = hinges_s1[i] as IMyMotorStator;
+                        var hinge_s2 = hinges_s2[i] as IMyMotorStator;
+                        var hinge_s3 = hinges_s3[i] as IMyMotorStator;
+
+                        hinge_s1.SetValueFloat("UpperLimit", 0);
+                        hinge_s1.TargetVelocityRPM = -1;
+                        hinge_s2.SetValueFloat("UpperLimit", 90);
+                        hinge_s2.TargetVelocityRPM = -2;
+                        hinge_s3.SetValueFloat("UpperLimit", 90);
+                        hinge_s3.TargetVelocityRPM = -1;
+                    };
 
                     time = 0;
-                    args = "wait5";
+                    args = "wait_stop";
 
                     break;
 
-                case "wait5":   //Таймер между возвратом платформы и остановкой срипта
+                case "wait_stop":   //Таймер между возвратом платформы и остановкой срипта
 
-                    if (time != 10)
+                    if (time != 100)
                     {
                         time++;
-                        args = "wait5";
+                        args = "wait_stop";
                     }
                     else
                     {
@@ -279,27 +307,57 @@ namespace Script1
 
                 case "start":   //Старт работы
 
-                    for (int i = 0; i < rotor.Count; i++)
+                    for (int i = 0; i < rotor.Count; i++)   //Запуск ротора
                     {
                         var rotor_1 = rotor[i] as IMyMotorStator;
 
                         rotor_1.ApplyAction("OnOff_On");
                         rotor_1.SetValueFloat("Torque", 100000000);
                         rotor_1.SetValueFloat("BrakingTorque", 0);
-                        rotor_1.TargetVelocityRPM = 0.01F;
+                        rotor_1.TargetVelocityRPM = 0.1F;
                     };
-                    for (int i = 0; i < drills.Count; i++)
+
+                    for (int i = 0; i < drills.Count; i++)   //Запуск буров
                     {
                         var drills_1 = drills[i] as IMyShipDrill;
 
                         drills_1.ApplyAction("OnOff_On");
                     };
-                    Runtime.UpdateFrequency = UpdateFrequency.Update100;
+
+                    for (int i = 0; i < hinges_s1.Count; i++)   //Вычисление положения лап
+                    {
+                        var hinge_s1 = hinges_s1[i] as IMyMotorStator;
+                        int step_s2;
+
+                        
+                        step_s2 = (int)(hinge_s1.Angle * 57.3);
+                        if (step_s2 > 90)
+						{
+                            step_s2 = step_s2 - 360;
+						}
+                        step_s = 2 * (step_s2 + 90) - 1;
+                    };
+
+                    for (int i = 0; i < hinges_d.Count; i++)   //Вычисление положения нижней платформы
+                    {
+                        var hinge_s1 = hinges_d[i] as IMyMotorStator;
+                        int step_d2;
+
+
+                        step_d2 = (int)(hinge_s1.Angle * 57.3);
+                        if (step_d2 > 90)
+                        {
+                            step_d2 = step_d2 - 360;
+                        }
+                        step_d = step_d2 + 90;
+                    };
+
+                    Runtime.UpdateFrequency = UpdateFrequency.Update10;
                     time = 0;
-                    args = "stepside_go";
+                    args = "side_go";
                     break;
 
-                case "stop":   //Остановка работы
+                case "stop":   //Остановка ротора, буров и скрипта
 
                     for (int i = 0; i < rotor.Count; i++)
                     {
@@ -327,41 +385,76 @@ namespace Script1
             }    //switch end
 
 
-            for (int i1 = 0; i1 < rotor.Count; i1++)
+            for (int i1 = 0; i1 < rotor.Count; i1++)   //Выведение переменных для дебага на дипсплей
             {
                 var rotor_1 = rotor[i1] as IMyMotorStator;
+                int time_hour_i; int time_min_i; int time_sec_i;
+                string time_hour_s; string time_min_s; string time_sec_s;
 
-                for (int i = 0; i < lcds.Count; i++)   //Выведение переменных для дебага на дипсплей
+                for (int i = 0; i < lcds.Count; i++)
                 {
                     var lcd = lcds[i] as IMyTextPanel;
+                    lcd.SetValue("FontSize", 1.7F);
+
+                    //Математика часов
+
+                    time_hour_i = (time / 1560) % 60;
+                    time_min_i = (time / 360) % 60;
+                    time_sec_i = (time / 6) % 60;
+
+                    if
+                        (time_hour_i < 10)
+                        { time_hour_s = "0" + (time_hour_i).ToString(); }
+                    else
+                        { time_hour_s = (time_hour_i).ToString(); };
+
+                    if
+                        (time_min_i < 10)
+                        { time_min_s = "0" + (time_min_i).ToString(); }
+                    else
+                        { time_min_s = (time_min_i).ToString(); };
+
+                    if
+                        (time_sec_i < 10)
+                        { time_sec_s = "0" + (time_sec_i).ToString(); }
+                    else
+                        { time_sec_s = (time_sec_i).ToString(); };
+
+                    //Выведение на дисплей
 
                     lcd.WriteText
                         (
-                        "step_s = " + step_s.ToString()
+                        "argument = " + args.ToString(), false
                         );
                     lcd.WriteText
                         (
-                        "\n" + "step_d = " + step_d.ToString(), true
+                        "\n" + "\n" + "step side = " + step_s.ToString(), true
                         );
                     lcd.WriteText
                         (
-                        "\n" + "time = " + time.ToString(), true
+                        "\n" + "step down = " + step_d.ToString(), true
                         );
                     lcd.WriteText
                         (
-                        "\n" + "args = " + args.ToString(), true
+                        "\n" + "\n" + "time value  = " + time.ToString(), true
                         );
                     lcd.WriteText
-                    (
-                    "\n" + "rotor pos = " + rotor_1.Angle.ToString(), true
-                    );
+                        (
+                        "\n" + "time = " + time_hour_s + ":" + time_min_s + ":" + time_sec_s, true
+                        );
+                    lcd.WriteText
+                        (
+                        "\n" + "rotor radian = " + Math.Round(rotor_1.Angle, 2).ToString(), true
+                        );
+                    lcd.WriteText
+                        (
+                        "\n" + "rotor degree = " + Math.Round(rotor_1.Angle * 57.3) .ToString() + "°", true
+                        );
                 };
 
             };
 
             args_b = args.ToString();   //Сохранение аргументов от Runtime.UpdateFrequency
-             step_s_b = step_s;
-             step_d_b = step_d;
         }
 
         public void Save()
