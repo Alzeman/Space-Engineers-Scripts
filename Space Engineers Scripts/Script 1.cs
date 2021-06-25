@@ -125,12 +125,10 @@ namespace Script1
 
                 //Таймер раскрытия лап
 
-                case "wait_side_go":   
+                case "wait_side_go":
 
-                    for (int i = 0; i < rotor.Count; i++)
+                    foreach (IMyMotorStator rotor_1 in rotor)
                     {
-                        var rotor_1 = rotor[i] as IMyMotorStator;
-
                         if (Math.Round(rotor_1.Angle, 2) == 0 & time > 300)
                         {
                             time = 0;
@@ -157,28 +155,23 @@ namespace Script1
 
                 //Таймер между полноым раскрытием лап и их возвратом
 
-                case "wait_side_back":   
+                case "wait_side_back":
 
-                    for (int i = 0; i < rotor.Count; i++)
+                    foreach (IMyMotorStator rotor_1 in rotor)
                     {
-                        var rotor_1 = rotor[i] as IMyMotorStator;
-
                         if (Math.Round(rotor_1.Angle, 2) == 0 & time > 300)
                         {
                             time = 0;
-                            step_s = 0;
                             args = "side_back";
                         }
                         else if (Math.Round(rotor_1.Angle, 2) == 0.00 & time > 300)
                         {
                             time = 0;
-                            step_s = 0;
                             args = "side_back";
                         }
                         else if (Math.Round(rotor_1.Angle, 2) == 3.14 & time > 300)
                         {
                             time = 0;
-                            step_s = 0;
                             args = "side_back";
                         }
                         else
@@ -246,15 +239,30 @@ namespace Script1
                 //Таймер между возвратом лап и шагом платформы вниз
 
                 case "wait_down_go":   
-                    if (time != 1000)
+                    
+                    foreach (IMyMotorStator hinge_d in hinges_d)
                     {
-                        time++;
-                        args = "wait_down_go";
-                    }
-                    else
-                    {
-                        time = 0;
-                        args = "down_go";
+
+                        if (Math.Round(hinge_d.Angle, 2) == 0 & time > 300)
+                        {
+                            time = 0;
+                            args = "down_go";
+                        }
+                        else if (Math.Round(hinge_d.Angle, 2) == 0.00 & time > 300)
+                        {
+                            time = 0;
+                            args = "down_go";
+                        }
+                        else if (Math.Round(hinge_d.Angle, 2) == 3.14 & time > 300)
+                        {
+                            time = 0;
+                            args = "down_go";
+                        }
+                        else
+                        {
+                            time++;
+                            args = "wait_down_go";
+                        };
                     };
                     break;
 
@@ -302,6 +310,28 @@ namespace Script1
                     };
                     break;
 
+                //Платформа обратно
+
+                case "down_back":
+                    step_d--;
+                    if (step_d < 0) { step_d = 0; };   //Защита от закликивания игроком
+
+                    for (int step_c = step_d; step_c < 181;)   //Счетчик от 0 до 180
+                    {
+                        int step_d1; step_d1 = -90;
+                        step_d1 = step_d1 + step_c;
+
+                        foreach (IMyMotorStator hinge_d in hinges_d)   //Передача значений в шарниры
+                        {
+                            hinge_d.SetValueFloat("UpperLimit", 90);
+                            hinge_d.SetValueFloat("LowerLimit", step_d1);
+                            hinge_d.TargetVelocityRPM = -0.1F;
+                        };
+                        args = args_b.ToString();
+                        break;
+                    };
+                    break;
+
 
                 //Таймер между полным опусканием платформы и перед её возвратом
 
@@ -344,6 +374,7 @@ namespace Script1
                     foreach (IMyMotorStator hinge_d in hinges_d)   //Передача значений в шарниры
                     {
                         hinge_d.SetValueFloat("UpperLimit", 90);
+                        hinge_d.SetValueFloat("LowerLimit", -90);
                         hinge_d.TargetVelocityRPM = -1;
                     };
 
@@ -360,20 +391,21 @@ namespace Script1
                         {
                             hinge_s1.SetValueFloat("UpperLimit", 0);
                             hinge_s1.SetValueFloat("LowerLimit", step_s1);
-                            hinge_s1.TargetVelocityRPM = -0.1F;
+                            hinge_s1.TargetVelocityRPM = -1;
                         };
                         foreach (IMyMotorStator hinge_s2 in hinges_s2)   //Передача значений в шарниры
                         {
                             hinge_s2.SetValueFloat("UpperLimit", 90);
                             hinge_s2.SetValueFloat("LowerLimit", step_s2);
-                            hinge_s2.TargetVelocityRPM = -0.2F;
+                            hinge_s2.TargetVelocityRPM = -2;
                         };
                         foreach (IMyMotorStator hinge_s3 in hinges_s3)   //Передача значений в шарниры
                         {
                             hinge_s3.SetValueFloat("UpperLimit", 90);
                             hinge_s3.SetValueFloat("LowerLimit", step_s3);
-                            hinge_s3.TargetVelocityRPM = -0.1F;
+                            hinge_s3.TargetVelocityRPM = -1;
                         };
+                        break;
                     };
 
                     time = 0;
@@ -425,7 +457,15 @@ namespace Script1
 
                     Runtime.UpdateFrequency = UpdateFrequency.Update10;
                     time = 0;
-                    args = "side_go";
+
+                    if (Me.CustomData != null)
+					{
+                        args = Me.CustomData;
+                    }
+					else
+					{
+                        args = "side_go";
+                    }
                     break;
 
 
@@ -571,7 +611,7 @@ namespace Script1
 
         public void Save()
         {
-
+            Me.CustomData = args_b;
         }
 
         //------------END--------------
